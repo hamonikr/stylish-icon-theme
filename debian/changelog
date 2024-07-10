@@ -1,7 +1,6 @@
-stylish-icon-theme (2.0.0) stable; urgency=medium
+stylish-icon-theme (1.0.0) stable; urgency=medium
 
   [Kevin Kim]
-  * Release for paektu
+  * Update from latest upstream
 
  -- HamoniKR <pkg@hamonikr.org>  Wed, 10 Jul 2024 12:31:30 +0900
-

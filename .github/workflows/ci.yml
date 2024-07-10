@@ -50,7 +50,9 @@ jobs:
           docker run --rm -v ${PWD}:/pkgbuild -w /pkgbuild archlinux bash -c "
           pacman -Syu --noconfirm &&
           pacman -S --noconfirm base-devel wget &&
-          makepkg -s
+          useradd -m builder &&
+          chown -R builder:builder /pkgbuild &&
+          sudo -u builder bash -c 'cd /pkgbuild && makepkg -s'
           "
 
       - name: Upload Arch Linux Package

@@ -1,4 +1,4 @@
-# Maintainer: Kevin Kim <root@hamonikr.org>
+# Maintainer: Kevin Kim <chaeya@gmail.com>
 pkgname=stylish-icon-theme
 pkgver=1.0
 pkgrel=1
@@ -8,7 +8,7 @@ url="https://github.com/hamonikr/stylish-icon-theme"
 license=('GPL')
 depends=('wget')
 makedepends=('devtools' 'base-devel')
-source=("https://github.com/hamonikr/stylish-icon-theme/releases/download/1.0.0/stylish-icon-theme_1.0.0_all.deb")
+source=("https://github.com/hamonikr/stylish-icon-theme/releases/download/v1.0.0/stylish-icon-theme_1.0.0_all.deb")
 sha256sums=('SKIP')
 
 prepare() {

@@ -1,4 +1,4 @@
-name: Build and Release Debian Package
+name: Build and Release Debian and Arch Linux Packages
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - "v*"
 
 jobs:
-  build:
+  build-debian:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,8 +20,6 @@ jobs:
         with:
           docker-image: ubuntu:24.04          
           buildpackage-opts: --build=binary --no-sign
-          # When change deb package name as git rev id
-          # before-build-hook: debchange --controlmaint --local="+ci${{ github.run_id }}~git$(git rev-parse --short HEAD)" "CI build"
           extra-build-deps: devscripts git equivs debhelper build-essential
           host-arch: amd64
           artifacts-dir: debian/artifacts
@@ -32,23 +30,60 @@ jobs:
           name: debian-package
           path: debian/artifacts/*.deb
 
-  release:
-    needs: build
+  build-arch:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-      - name: Download build artifacts
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Arch Linux Package
+        run: |
+          docker run --rm -v ${PWD}:/pkgbuild -w /pkgbuild archlinux bash -c "
+          pacman -Syu --noconfirm &&
+          pacman -S --noconfirm base-devel wget &&
+          makepkg -s
+          "
+
+      - name: Upload Arch Linux Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: archlinux-package
+          path: "*.pkg.tar.zst"
+
+  release:
+    needs: [build-debian, build-arch]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Debian build artifacts
         uses: actions/download-artifact@v2
         with:
           name: debian-package
-          path: .
+          path: debian
 
-      - run: ls -R .
+      - name: Download Arch Linux build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: archlinux-package
+          path: arch
+
+      - name: List files
+        run: ls -R .
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./*.deb
+          files: |
+            debian/*.deb
+            arch/*.pkg.tar.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
